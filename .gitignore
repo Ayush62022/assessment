@@ -1,0 +1,24 @@
+# Environment variables
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+deep_env/
+*.egg-info/
+pip-wheel-metadata/
+
+# Storage
+storage/
+
+# IDE files
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Docker
+*.log
+*.pid
