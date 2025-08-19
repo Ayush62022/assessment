@@ -18,6 +18,11 @@ import soundfile as sf
 from pyannote.audio import Pipeline
 from pyannote.core import Segment
 import numpy as np
+from dotenv import load_dotenv
+
+# Load variables from .env file
+load_dotenv()
+
 
 # Suppress warnings
 warnings.filterwarnings("ignore")
@@ -39,7 +44,8 @@ class AudioTranscriber:
         try:
             self.diarization_pipeline = Pipeline.from_pretrained(
                 "pyannote/speaker-diarization-3.1",
-                use_auth_token="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" # You'll need this
+                # use_auth_token="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" # You'll need this
+                use_auth_token= os.getenv("HF_TOKEN")
             )
         except Exception as e:
             print(f"Warning: Could not load diarization pipeline: {e}")
