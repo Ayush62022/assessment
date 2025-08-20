@@ -400,47 +400,7 @@ volumes:
   postgres_data:
   redis_data:
   minio_data:
-```
-
-### Kubernetes Deployment
-
-```yaml
-# audio-transcription-deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: audio-api
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: audio-api
-  template:
-    metadata:
-      labels:
-        app: audio-api
-    spec:
-      containers:
-      - name: audio-api
-        image: your-registry/audio-api:latest
-        ports:
-        - containerPort: 8000
-        env:
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: db-secret
-              key: url
-        - name: REDIS_URL
-          value: "redis://redis-service:6379/0"
-        resources:
-          requests:
-            memory: "4Gi"
-            cpu: "1000m"
-          limits:
-            memory: "8Gi"
-            cpu: "2000m"
-```
+ 
 
 ### Monitoring & Logging
 
@@ -662,5 +622,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [ ] Security scanning and vulnerability management
 
 ---
+
 
 **Built with ❤️ for content creators and developers**
