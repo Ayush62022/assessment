@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  # FastAPI Application
+  blog-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: blog-suggestion-api
+    ports:
+      - "8000:8000"
+    environment:
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-your-super-secret-jwt-key-change-this}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    volumes:
+      - ./data:/app/data  # Mount for SQLite database persistence
+      - ./logs:/app/logs  # Optional: for application logs
+    depends_on:
+      - redis
+      - minio
+    networks:
+      - blog-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Redis for rate limiting
+  redis:
+    image: redis:7-alpine
+    container_name: blog-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    networks:
+      - blog-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # MinIO for S3-compatible storage (future use)
+  minio:
+    image: minio/minio:latest
+    container_name: blog-minio
+    ports:
+      - "9000:9000"    # API port
+      - "9001:9001"    # Console port
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin123}
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - blog-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # Redis Commander (Optional - for Redis management UI)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: blog-redis-commander
+    ports:
+      - "8081:8081"
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    depends_on:
+      - redis
+    networks:
+      - blog-network
+    restart: unless-stopped
+    profiles:
+      - debug  # Only start with --profile debug
+
+# Networks
+networks:
+  blog-network:
+    driver: bridge
+
+# Volumes for data persistence
+volumes:
+  redis_data:
+    driver: local
+  minio_data:
+    driver: local
