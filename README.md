@@ -117,7 +117,7 @@ ls medium_post_titles.csv
 
 3. **Run the service:**
 ```bash
-uvicorn blog_app.main:app --host 0.0.0.0 --port 8001 --reload
+uvicorn new_project.main:app --host 0.0.0.0 --port 8001 --reload
 ```
 
 ## 📋 API Documentation
